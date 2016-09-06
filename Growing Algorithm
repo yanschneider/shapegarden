@@ -1,0 +1,413 @@
+	//grow fruit
+	bool grow (Fruit f)
+	{
+
+		//enabling logging to the console for this method?
+		bool debugLog = false;
+
+
+		//growing not possible?
+		if (!f.Growing || f.IsFalling) {
+			if(debugLog){
+				Debug.Log( f.Number +  " - Growing not possible Fruit was blocked or is falling");
+
+			}
+			return false;
+		}
+
+		if (debugLog) {
+			Debug.Log (f.Number + " Size: " + f.Background.transform.localScale.x);
+			Debug.Log (f.Number + " posX: " + f.Background.transform.localPosition.x);
+		}
+
+	
+		bool topleft = true;
+		bool topright = true;
+		bool bottomright = true;
+		bool bottomleft = true;
+		bool top = true;
+		bool bottom = true;
+		bool left = true;
+		bool right = true;
+
+		f.GrowingTime += Time.fixedDeltaTime;
+
+		float minStep = 0;
+
+		minStep = f.GrowingSpeed;
+
+		if (debugLog) {
+			Debug.Log ("growingspeed: " + f.GrowingSpeed);
+		}
+
+		Bounds testbounds = f.Background.GetComponent<BoxCollider2D> ().bounds;
+
+
+			Bounds gardenbounds = g.OuterBounds.bounds;
+
+
+		//check topleft
+		testbounds.center += new Vector3 (-minStep, minStep, 0);
+		
+		if (!gardenbounds.Contains (new Vector2 (testbounds.min.x, testbounds.max.y))) {
+			if (debugLog)
+				Debug.Log( f.Number + " Top left not in garden");
+			topleft = false;
+		}
+
+		
+		if (topleft) {
+		
+			foreach (Fruit fru in fruitCollection) {
+				if (fru != f && !fru.IsFalling) {
+		
+					Bounds otherFruitBounds = fru.Background.GetComponent<BoxCollider2D> ().bounds;
+		
+					if (otherFruitBounds.Intersects (testbounds)) {
+						topleft = false;
+						if (debugLog)
+							Debug.Log (f.Number + " Top left intersects with another fruit");
+					
+					}
+
+				}
+			}
+		}
+		
+		//check topright
+		//move two times to the right
+		testbounds.center += new Vector3 (2f * minStep, 0, 0);
+		
+		if (!gardenbounds.Contains ((Vector2) testbounds.max)) {
+			if (debugLog)
+				Debug.Log( f.Number + " Top right not in garden");
+			topright = false;
+				
+		}
+
+		
+		if (topright) {
+		
+			foreach (Fruit fru in fruitCollection) {
+				if (fru != f && !fru.IsFalling) {
+		
+					Bounds otherFruitBounds = fru.Background.GetComponent<BoxCollider2D> ().bounds;
+		
+					if (otherFruitBounds.Intersects (testbounds)) {
+						topright = false;
+						if (debugLog)
+							Debug.Log (f.Number + " Top right intersects with another fruit");
+					}
+				}
+			}
+		}
+		
+		//check bottomright
+		//move 2 times down
+		testbounds.center += new Vector3 (0, -2f * minStep, 0);
+		
+		if (!gardenbounds.Contains (new Vector2 (testbounds.max.x, testbounds.min.y))) {
+			if (debugLog)
+				Debug.Log( f.Number + " Bottom right not in garden");
+			bottomright = false;
+		}
+
+		
+		if (bottomright) {
+		
+			foreach (Fruit fru in fruitCollection) {
+		
+				if (fru != f && !fru.IsFalling) {
+		
+					Bounds otherFruitBounds = fru.Background.GetComponent<BoxCollider2D> ().bounds;
+		
+					if (otherFruitBounds.Intersects (testbounds)) {
+						bottomright = false;
+						if (debugLog)
+							Debug.Log (f.Number + " Bottom right intersects with another fruit");
+					}
+				}
+			}
+		}
+		
+		//check bottomleft
+		//move 2 times to the left
+		testbounds.center += new Vector3 (-2f * minStep, 0, 0);
+		
+		if (!gardenbounds.Contains ((Vector2)testbounds.min)) {
+			if (debugLog)
+				Debug.Log( f.Number + " Bottom left not in garden");
+			bottomleft = false;
+		}
+
+		
+		if (bottomleft) {
+		
+			foreach (Fruit fru in fruitCollection) {
+		
+				if (fru != f && !fru.IsFalling) {
+		
+					Bounds otherFruitBounds = fru.Background.GetComponent<BoxCollider2D> ().bounds;
+		
+					if (otherFruitBounds.Intersects (testbounds)) {
+						bottomleft = false;
+						if(debugLog)
+							Debug.Log( f.Number + " Bottom left intersects with another fruit");
+					}
+				}
+			}
+		}
+		
+		if (!bottomleft && !bottomright && !topright && !topleft) {
+			//growing not possible
+			f.Growing = false;
+			if (debugLog)
+				Debug.Log (f.Number + " All sides are blocked");
+
+			return false;
+		}
+
+		// check if growth in every direction is possible
+
+		if (topleft && topright && bottomleft && bottomright) {
+			f.Background.transform.localScale += new Vector3 (minStep, minStep, 0);
+			f.Skin.transform.localScale += new Vector3 (minStep, minStep, 0);
+			return true;
+		}
+
+		//check left
+		//move 1 up (we came from bottomleft)
+		testbounds.center += new Vector3 (0, minStep, 0);
+
+		if (!gardenbounds.Contains ((Vector2)testbounds.min)) {
+			if (debugLog)
+				Debug.Log( f.Number + " Left not in garden");
+			left = false;
+		}
+
+
+		if (left) {
+
+			foreach (Fruit fru in fruitCollection) {
+
+				if (fru != f && !fru.IsFalling) {
+
+					Bounds otherFruitBounds = fru.Background.GetComponent<BoxCollider2D> ().bounds;
+
+					if (otherFruitBounds.Intersects (testbounds)) {
+						left = false;
+						if (debugLog)
+							Debug.Log (f.Number + " Left intersects with another fruit");
+					}
+				}
+			}
+		}
+		
+
+
+
+
+		//check top
+		//move 1 up and 1 right
+		testbounds.center += new Vector3 (minStep, minStep, 0);
+
+		if (!gardenbounds.Contains (new Vector2 (testbounds.max.x, testbounds.max.y))) {
+			if (debugLog)
+				Debug.Log( f.Number + " Top not in garden ");
+			top = false;
+		}
+
+
+		if (top) {
+
+			foreach (Fruit fru in fruitCollection) {
+
+				if (fru != f && !fru.IsFalling) {
+
+					Bounds otherFruitBounds = fru.Background.GetComponent<BoxCollider2D> ().bounds;
+
+					if (otherFruitBounds.Intersects (testbounds)) {
+						top = false;
+						if (debugLog)
+						Debug.Log (f.Number + " Top intersects with another fruit");
+					}
+				}
+			}
+		}
+
+
+
+		//check right
+		//move 1 right and 1 down
+		testbounds.center += new Vector3 (minStep, -minStep, 0);
+
+		if (!gardenbounds.Contains ((Vector2)testbounds.max)) {
+			if (debugLog)
+				Debug.Log( f.Number + " Right not in garden");
+			right = false;
+		}
+
+		if (right) {
+			foreach (Fruit fru in fruitCollection) {
+				if (fru != f && !fru.IsFalling) {
+					Bounds otherFruitBounds = fru.Background.GetComponent<BoxCollider2D> ().bounds;
+
+					if (otherFruitBounds.Intersects (testbounds)) {
+						right = false;
+						if (debugLog)
+						Debug.Log (f.Number + "Right intersects with another fruit");
+					}
+				}
+			}
+		}
+
+		//check bottom
+		//move 1 left and 1 down
+		testbounds.center += new Vector3 (-minStep, -minStep, 0);
+
+		//visualizeBounds (testbounds);
+
+		if (!gardenbounds.Contains ((Vector2) testbounds.min)) {
+			if (debugLog)
+				Debug.Log( f.Number + " Bottom not in garden");
+
+
+
+			bottom = false;
+		}
+
+		if (bottom) {
+			foreach (Fruit fru in fruitCollection) {
+				if (fru != f && !fru.IsFalling) {
+					Bounds otherFruitBounds = fru.Background.GetComponent<BoxCollider2D> ().bounds;
+
+					if (otherFruitBounds.Intersects (testbounds)) {
+						bottom = false;
+						if (debugLog)
+						Debug.Log (f.Number + " Bottom intersects with another fruit");
+					}
+				}
+			}
+		}
+
+
+
+		// check if growth in 3 directions (at the same time) is possible
+
+		float moveFactor = 2f;
+
+		//grow to the right
+		if (topright && bottomright && top && right && bottom) {
+			f.Background.transform.localScale += new Vector3 (minStep, minStep, 0);
+			f.Skin.transform.localScale += new Vector3 (minStep, minStep, 0);
+			//move to the right
+			f.Background.transform.localPosition += new Vector3 (moveFactor * minStep, 0, 0);
+			f.Skin.transform.localPosition += new Vector3 (moveFactor * minStep, 0, 0);
+			if (debugLog)
+			Debug.Log (f.Number + " Growing to the right is possible");
+
+			return true;
+		}
+
+		//grow to the left
+		if (topleft && bottomleft && top && bottom && left) {
+			f.Background.transform.localScale += new Vector3 (minStep, minStep, 0);
+			f.Skin.transform.localScale += new Vector3 (minStep, minStep, 0);
+			//move to the right
+			f.Background.transform.localPosition += new Vector3 (-moveFactor * minStep, 0, 0);
+			f.Skin.transform.localPosition += new Vector3 (-moveFactor * minStep, 0, 0);
+			if (debugLog)
+			Debug.Log (f.Number + " Growing to the left is possible");
+			return true;
+		}
+
+		//grow to the bottom
+		if (bottomleft && bottomright && bottom && right && left) {
+			f.Background.transform.localScale += new Vector3 (minStep, minStep, 0);
+			f.Skin.transform.localScale += new Vector3 (minStep, minStep, 0);
+			//move to the right
+			f.Background.transform.localPosition += new Vector3 (0, -moveFactor * minStep, 0);
+			f.Skin.transform.localPosition += new Vector3 (0, -moveFactor * minStep, 0);
+			if (debugLog)
+			Debug.Log (f.Number + " Growing to the bottom is possible");
+			return true;
+		}
+
+		//grow to the top
+		if (topright && topleft && top && left && right) {
+			f.Background.transform.localScale += new Vector3 (minStep, minStep, 0);
+			f.Skin.transform.localScale += new Vector3 (minStep, minStep, 0);
+			//move to the right
+			f.Background.transform.localPosition += new Vector3 (0, moveFactor * minStep, 0);
+			f.Skin.transform.localPosition += new Vector3 (0, moveFactor * minStep, 0);
+			if (debugLog)
+			Debug.Log (f.Number + " Growing to the top is possible");
+			return true;
+		}
+
+
+		//check if growth in 2 directions ( at the same time ) is possible
+
+		//topleft
+		if (topleft && left && top) {
+			f.Background.transform.localScale += new Vector3 (minStep, minStep, 0);
+			f.Skin.transform.localScale += new Vector3 (minStep, minStep, 0);
+			//move to the left and up
+			f.Background.transform.localPosition += new Vector3 (-moveFactor * minStep, moveFactor * minStep, 0);
+			f.Skin.transform.localPosition += new Vector3 (-moveFactor * minStep, moveFactor * minStep, 0);
+			if (debugLog)
+			Debug.Log (f.Number + " Growing to the topleft is possible");
+			return true;
+		}
+
+		//topright
+		if (topright && top && right) {
+			f.Background.transform.localScale += new Vector3 (minStep, minStep, 0);
+			f.Skin.transform.localScale += new Vector3 (minStep, minStep, 0);
+			//move to the right and up
+			f.Background.transform.localPosition += new Vector3 (moveFactor * minStep, moveFactor * minStep, 0);
+			f.Skin.transform.localPosition += new Vector3 (moveFactor * minStep, moveFactor * minStep, 0);
+			if (debugLog)
+			Debug.Log (f.Number + " Growing to the topright is possible");
+			return true;
+		}
+
+		//bottomright
+		if (bottomright && bottom && right) {
+			f.Background.transform.localScale += new Vector3 (minStep, minStep, 0);
+			f.Skin.transform.localScale += new Vector3 (minStep, minStep, 0);
+			//move to the right and down
+			f.Background.transform.localPosition += new Vector3 (moveFactor * minStep, -moveFactor * minStep, 0);
+			f.Skin.transform.localPosition += new Vector3 (moveFactor * minStep, -moveFactor * minStep, 0);
+			if (debugLog)
+			Debug.Log (f.Number + " Growing to the bottomright is possible");
+			return true;
+		}
+
+		//bottomleft
+		if (bottomleft && bottom && left) {
+			f.Background.transform.localScale += new Vector3 (minStep, minStep, 0);
+			f.Skin.transform.localScale += new Vector3 (minStep, minStep, 0);
+			//move to the left and down
+			f.Background.transform.localPosition += new Vector3 (-moveFactor * minStep, -moveFactor * minStep, 0);
+			f.Skin.transform.localPosition += new Vector3 (-moveFactor * minStep, -moveFactor * minStep, 0);
+			if (debugLog)
+			Debug.Log (f.Number + " Growing to the bottomleft is possible");
+			return true;
+		}
+
+		if (debugLog) {
+			Debug.Log( f.Number + " :Growing Not Possible");
+			Debug.Log( f.Number + " topleft: " + topleft);
+			Debug.Log( f.Number + " top: " + top);
+			Debug.Log( f.Number + " topright: " + topright);
+			Debug.Log( f.Number + " right: " + right);
+			Debug.Log( f.Number + " bottomright: " + bottomright);
+			Debug.Log( f.Number + " bottom: " + bottom);
+			Debug.Log( f.Number + " bottomleft: " + bottomleft);
+			Debug.Log( f.Number + " left: " + left);
+		}
+			
+		f.Growing = false;
+		return false;
+	}
